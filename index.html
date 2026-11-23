@@ -1,0 +1,1072 @@
+﻿<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShifoGO - Raqamli Tibbiyot Portali</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
+        @keyframes pulse-subtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .pulse-btn { animation: pulse-subtle 2.5s infinite ease-in-out; }
+
+        .animated-gradient-text {
+            background: linear-gradient(270deg, #0d9488, #2563eb, #14b8a6, #0d9488);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-shift 6s ease infinite;
+        }
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .tilt-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .tilt-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(13, 148, 136, 0.15); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased flex flex-col min-h-screen">
+
+    <!-- TOP BAR -->
+    <div class="bg-brand-900 text-slate-100 text-xs sm:text-sm py-2 px-4">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div class="flex items-center space-x-3">
+                <span class="bg-brand-700 text-teal-100 text-xs px-2 py-0.5 rounded-full font-medium">
+                    <i class="fa-solid fa-bolt text-yellow-300 mr-1 text-[10px]"></i> Yangilik
+                </span>
+                <span>Sun'iy Intellekt Triage, GPS Marshrut va Onlayn To'lov Tizimi!</span>
+            </div>
+            <div class="flex items-center space-x-4 text-xs">
+                <a href="tel:103" class="hover:text-teal-300 font-semibold"><i class="fa-solid fa-phone mr-1"></i> Tez yordam: 103</a>
+                <span class="text-brand-700">|</span>
+                <button onclick="openSuggestionModal()" class="bg-teal-600 hover:bg-teal-500 text-white px-3 py-1 rounded-lg font-semibold transition flex items-center">
+                    <i class="fa-solid fa-lightbulb text-yellow-300 mr-1.5"></i> Takliflar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN NAVBAR -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+                    <div class="bg-gradient-to-tr from-brand-600 to-teal-400 text-white p-3 rounded-2xl shadow-md">
+                        <i class="fa-solid fa-hospital-user text-2xl"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center">
+                            <span class="text-2xl font-black text-slate-900">Shifo<span class="text-brand-600">GO</span></span>
+                            <span class="ml-2 bg-teal-100 text-brand-800 text-[10px] font-bold px-1.5 py-0.5 rounded">AI PRO</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 font-medium">Milliy Tibbiyot Portali</p>
+                    </div>
+                </div>
+
+                <nav class="hidden md:flex items-center space-x-8 text-sm font-semibold text-slate-600">
+                    <a href="#clinics" class="hover:text-brand-600 transition">Klinikalar</a>
+                    <a href="#doctors" class="hover:text-brand-600 transition">Shifokorlar</a>
+                    <a href="#navigator" class="hover:text-brand-600 transition">Navigatsiya</a>
+                </nav>
+
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <button onclick="openAiChat('')" class="hidden sm:flex bg-slate-100 hover:bg-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition items-center border border-slate-200">
+                        <i class="fa-solid fa-robot text-brand-600 mr-2"></i> AI Maslahatchi
+                    </button>
+                    <button id="authBtn" onclick="openRegisterModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition shadow-sm flex items-center">
+                        <i class="fa-solid fa-user-plus mr-1.5"></i> <span id="authBtnText">Ro'yxatdan o'tish</span>
+                    </button>
+                    <button onclick="scrollToSection('clinics')" class="hidden lg:flex bg-brand-600 hover:bg-brand-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition shadow-sm items-center">
+                        <i class="fa-regular fa-calendar-check mr-1.5"></i> Navbat
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="relative bg-gradient-to-b from-teal-50/50 via-white to-slate-50 py-12 lg:py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto space-y-6">
+                <span class="bg-brand-100 text-brand-800 px-4 py-1 rounded-full text-xs font-semibold">
+                    🤖 AI Simptom Triage & GPS Navigatsiya
+                </span>
+                <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                    Sog'lig'ingiz uchun <span class="animated-gradient-text">eng maqbul klinikani</span> va probkasiz yo'lni toping
+                </h1>
+                <p class="text-slate-600 text-base sm:text-lg">
+                    Sun'iy intellekt orqali simptomlarni aniqlang, eng yetakchi shifokorlarga navbat oling va eng muqobil yo'l orqali yetib boring!
+                </p>
+
+                <div class="bg-white p-3 rounded-2xl shadow-xl border border-slate-200 flex flex-col sm:flex-row gap-2 max-w-2xl mx-auto">
+                    <div class="relative flex-grow">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400"></i>
+                        <input type="text" id="heroSearch" placeholder="Shifokor sohasini yoki klinika nomini yozing..." class="w-full pl-10 pr-4 py-2.5 text-sm focus:outline-none">
+                    </div>
+                    <button onclick="handleHeroSearch()" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition">
+                        Qidirish
+                    </button>
+                    <button onclick="openAiChat('')" class="bg-teal-500 hover:bg-teal-600 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition flex items-center justify-center">
+                        <i class="fa-solid fa-robot mr-1.5"></i> AI Tahlil
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CLINICS FILTERS & GRID -->
+    <section id="clinics" class="py-12 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+                <div>
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-brand-600 mb-1">Tibbiyot Markazlari Bazasi</h2>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Hududlar bo'yicha klinikalar</h3>
+                </div>
+                <p class="text-slate-500 text-sm">Reyting, mutaxassislik va real vaqtda navigatsiya</p>
+            </div>
+
+            <!-- Filters -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-8 flex flex-wrap gap-4 items-center justify-between">
+                <div class="flex-grow max-w-xs relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
+                    <input type="text" id="clinicSearchInput" onkeyup="filterClinics()" placeholder="Klinika nomi bo'yicha izlash..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <label class="text-xs font-semibold text-slate-600">Hudud:</label>
+                    <select id="regionSelect" onchange="filterClinics()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
+                        <option value="all">Barcha Hududlar</option>
+                        <option value="tashkent_city">Toshkent shahri</option>
+                        <option value="tashkent_reg">Toshkent viloyati</option>
+                        <option value="andijan">Andijon viloyati</option>
+                        <option value="bukhara">Buxoro viloyati</option>
+                        <option value="fergana">Farg'ona viloyati</option>
+                        <option value="jizzakh">Jizzax viloyati</option>
+                        <option value="namangan">Namangan viloyati</option>
+                        <option value="navoiy">Navoiy viloyati</option>
+                        <option value="qashqadaryo">Qashqadaryo viloyati</option>
+                        <option value="samarkand">Samarqand viloyati</option>
+                        <option value="sirdaryo">Sirdaryo viloyati</option>
+                        <option value="surxondaryo">Surxondaryo viloyati</option>
+                        <option value="khorezm">Xorazm viloyati</option>
+                        <option value="qoraqalpogiston">Qoraqalpog'iston Respublikasi</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <label class="text-xs font-semibold text-slate-600">Yo'nalish:</label>
+                    <select id="specSelect" onchange="filterClinics()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand-500">
+                        <option value="all">Barcha Yo'nalishlar</option>
+                        <option value="kardiologiya">Kardiologiya</option>
+                        <option value="nevrologiya">Nevrologiya</option>
+                        <option value="pediatriya">Pediatriya</option>
+                        <option value="stomatologiya">Stomatologiya</option>
+                        <option value="dermatologiya">Dermatologiya</option>
+                        <option value="oftalmologiya">Oftalmologiya</option>
+                        <option value="ginekologiya">Ginekologiya</option>
+                        <option value="urologiya">Urologiya</option>
+                        <option value="ortopediya">Ortopediya</option>
+                        <option value="gastroenterologiya">Gastroenterologiya</option>
+                        <option value="lor">LOR</option>
+                        <option value="endokrinologiya">Endokrinologiya</option>
+                        <option value="xirurgiya">Xirurgiya</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Clinics Grid Container -->
+            <div id="clinicsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+    </section>
+
+    <!-- PROBKASIZ ROUTE SECTION -->
+    <section id="navigator" class="py-16 bg-white border-y border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-5 space-y-4">
+                    <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">
+                        <i class="fa-solid fa-route mr-1"></i> GPS Navigatsiya
+                    </span>
+                    <h3 class="text-2xl sm:text-4xl font-extrabold text-slate-900 leading-tight">
+                        Klinikaga eng tez va probkasiz marshrutni oching
+                    </h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        Klinikalar kartochkasidagi <strong>"Eng muqobil yo'l"</strong> tugmasi bosilganda qurilmangizning geolokatsiyasi orqali optimal marshrut avtomatik hisoblanadi.
+                    </p>
+                    <button onclick="getBestRouteWithLocation()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold px-6 py-3 rounded-xl text-sm transition shadow-md flex items-center">
+                        <i class="fa-solid fa-location-crosshairs mr-2 text-base"></i> Eng yaqin klinikaga muqobil yo'l
+                    </button>
+                </div>
+
+                <div class="lg:col-span-7 bg-slate-900 rounded-3xl p-6 text-white shadow-2xl relative">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="font-bold text-sm text-teal-300"><i class="fa-solid fa-map"></i> Real Vaqtda Marshrut Hisoblagichi</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-xs px-2.5 py-1 rounded-full border border-emerald-500/30">
+                            Status: Tirbandliksiz
+                        </span>
+                    </div>
+
+                    <div class="bg-slate-800/90 rounded-2xl p-6 border border-slate-700 space-y-4">
+                        <div class="flex justify-between items-center text-xs">
+                            <div>
+                                <p class="text-slate-400">Joriy joylashuv:</p>
+                                <p id="userLocText" class="font-bold text-white">GPS Aniqlanmoqda...</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-slate-400">Manzil klinika:</p>
+                                <p id="targetClinicText" class="font-bold text-teal-300">Respublika Markazi</p>
+                            </div>
+                        </div>
+
+                        <div class="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
+                            <div class="bg-gradient-to-r from-teal-400 to-emerald-400 h-full w-4/5"></div>
+                        </div>
+
+                        <div class="flex justify-between text-xs text-slate-300">
+                            <span>Optimal masofa: ~3.5 km</span>
+                            <span class="text-emerald-400 font-bold"><i class="fa-solid fa-clock"></i> Taxminan 8-10 daqiqa</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DOCTORS SECTION -->
+    <section id="doctors" class="py-16 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-brand-600 mb-2">Mutaxassislar Bazasi</h2>
+                <h3 class="text-2xl sm:text-4xl font-extrabold text-slate-900">Tajribali Shifokorlar</h3>
+            </div>
+            <div id="doctorsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 py-12 text-xs border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-2 text-white">
+                <i class="fa-solid fa-hospital-user text-brand-500 text-xl"></i>
+                <span class="text-xl font-bold">Shifo<span class="text-brand-500">GO</span></span>
+            </div>
+            <p>&copy; 2026 ShifoGO Milliy Tibbiyot Portali. Barcha huquqlar himoyalangan.</p>
+        </div>
+    </footer>
+
+    <!-- FLOATING AI BUTTON -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <button onclick="toggleAiModal()" class="pulse-btn bg-gradient-to-r from-brand-600 to-teal-500 hover:from-brand-700 hover:to-teal-600 text-white w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-2xl flex items-center justify-center text-2xl focus:outline-none">
+            <i class="fa-solid fa-robot"></i>
+        </button>
+    </div>
+
+    <!-- TAKLIFLAR MODALI -->
+    <div id="suggestionModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl p-6 relative shadow-2xl space-y-4">
+            <button onclick="closeSuggestionModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="flex items-center space-x-2 text-amber-500">
+                <i class="fa-solid fa-lightbulb text-2xl"></i>
+                <h3 class="text-lg font-bold text-slate-900">Taklif va Mulohazalar</h3>
+            </div>
+            <p class="text-xs text-slate-500">Platformani yanada rivojlantirish va yaxshilash bo'yicha takliflaringizni yozib qoldiring:</p>
+            <form onsubmit="submitSuggestion(event)" class="space-y-3 text-xs sm:text-sm">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Ismingiz</label>
+                    <input type="text" id="suggName" required placeholder="Ismingizni kiriting" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:border-brand-600">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Taklif matni</label>
+                    <textarea id="suggText" rows="3" required placeholder="Taklifingizni batafsil yozing..." class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:border-brand-600"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 rounded-xl transition">
+                    Taklifni Yuborish
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- RO'YXATDAN O'TISH MODALI -->
+    <div id="registerModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl p-6 relative shadow-2xl space-y-4">
+            <button onclick="closeRegisterModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center mx-auto text-2xl mb-2">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900">Ro'yxatdan o'tish</h3>
+                <p class="text-xs text-slate-500">ShifoGO platformasidan to'liq foydalanish uchun profil yarating</p>
+            </div>
+            <form onsubmit="submitRegister(event)" class="space-y-3 text-xs sm:text-sm">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Ism va Familiya</label>
+                    <input type="text" id="regName" required placeholder="Masalan: Anvarov Aziz" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:border-brand-600">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Telefon raqam</label>
+                    <input type="tel" id="regPhone" required placeholder="+998 90 123 45 67" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:border-brand-600">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Hudud</label>
+                    <select id="regRegion" class="w-full p-2.5 border border-slate-300 rounded-xl bg-slate-50 focus:outline-none focus:border-brand-600">
+                        <option value="Toshkent shahri">Toshkent shahri</option>
+                        <option value="Toshkent viloyati">Toshkent viloyati</option>
+                        <option value="Andijon viloyati">Andijon viloyati</option>
+                        <option value="Buxoro viloyati">Buxoro viloyati</option>
+                        <option value="Farg'ona viloyati">Farg'ona viloyati</option>
+                        <option value="Jizzax viloyati">Jizzax viloyati</option>
+                        <option value="Namangan viloyati">Namangan viloyati</option>
+                        <option value="Navoiy viloyati">Navoiy viloyati</option>
+                        <option value="Qashqadaryo viloyati">Qashqadaryo viloyati</option>
+                        <option value="Samarqand viloyati">Samarqand viloyati</option>
+                        <option value="Sirdaryo viloyati">Sirdaryo viloyati</option>
+                        <option value="Surxondaryo viloyati">Surxondaryo viloyati</option>
+                        <option value="Xorazm viloyati">Xorazm viloyati</option>
+                        <option value="Qoraqalpog'iston Respublikasi">Qoraqalpog'iston Respublikasi</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold py-3 rounded-xl transition shadow-md">
+                    Ro'yxatdan o'tishni yakunlash
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- AI CHAT BOT MODAL -->
+    <div id="aiModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[580px] max-h-[90vh]">
+            <div class="bg-gradient-to-r from-brand-700 to-teal-600 p-4 text-white flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm sm:text-base">ShifoGO AI Tibbiy Triage</h3>
+                        <p class="text-[11px] text-teal-100 flex items-center">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 mr-1.5"></span> Onlayn Maslahatchi
+                        </p>
+                    </div>
+                </div>
+                <button onclick="toggleAiModal()" class="text-white/80 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div id="chatMessages" class="flex-grow p-4 overflow-y-auto space-y-3 bg-slate-50 text-xs sm:text-sm">
+                <div class="flex items-start space-x-2">
+                    <div class="w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs shrink-0 mt-1">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 text-slate-800 max-w-[85%] shadow-sm">
+                        Assalomu alaykum! Men ShifoGO AI maslahatchisiman. Qaysi a'zongiz og'riyapti yoki qanday tahlil (masalan: <strong>qon topshirish, MRT, UZI</strong>) topshirmoqchisiz? Yozing, men mos shifokor va klinikalarni topib beraman.
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-2 bg-white border-t border-slate-100 flex gap-1.5 overflow-x-auto text-[11px]">
+                <button onclick="sendPresetSymptom('Ko\'zim og\'riyapti va xira ko\'ryapman')" class="bg-slate-100 hover:bg-brand-50 text-slate-700 px-2.5 py-1 rounded-full whitespace-nowrap">👁️ Ko'z og'rig'i</button>
+                <button onclick="sendPresetSymptom('Qon topshirmoqchiman qaysi klinikada bor?')" class="bg-slate-100 hover:bg-brand-50 text-slate-700 px-2.5 py-1 rounded-full whitespace-nowrap">🩸 Qon topshirish</button>
+                <button onclick="sendPresetSymptom('Tishim qattiq og\'riyapti')" class="bg-slate-100 hover:bg-brand-50 text-slate-700 px-2.5 py-1 rounded-full whitespace-nowrap">🦷 Tish og'rig'i</button>
+                <button onclick="sendPresetSymptom('MRT tahlili topshirmoqchiman')" class="bg-slate-100 hover:bg-brand-50 text-slate-700 px-2.5 py-1 rounded-full whitespace-nowrap">🩻 MRT Tashxisi</button>
+            </div>
+
+            <div class="p-3 bg-white border-t border-slate-200 flex items-center space-x-2">
+                <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatMessage()" placeholder="Simptom yoki tahlil nomini yozing..." class="flex-grow p-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none">
+                <button onclick="sendChatMessage()" class="bg-brand-600 hover:bg-brand-700 text-white p-2.5 rounded-xl transition">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KLINIKA ICHIGA KIRISH MODALI -->
+    <div id="clinicDetailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl rounded-3xl p-6 relative max-h-[90vh] overflow-y-auto space-y-6">
+            <button onclick="closeClinicDetailModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            
+            <div class="flex items-center space-x-4">
+                <img id="modalClinicImg" src="" class="w-20 h-20 rounded-2xl object-cover border border-slate-200">
+                <div>
+                    <h3 id="modalClinicName" class="text-xl font-bold text-slate-900">...</h3>
+                    <p id="modalClinicAddress" class="text-xs text-slate-500"><i class="fa-solid fa-location-dot text-brand-500"></i> ...</p>
+                    <span id="modalClinicRating" class="text-amber-500 font-bold text-xs"><i class="fa-solid fa-star"></i> 4.9</span>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-slate-900 text-sm mb-2"><i class="fa-solid fa-microscope text-brand-600 mr-1"></i> Mavjud Tibbiy Apparatlar va Uskunalar</h4>
+                <div id="modalClinicApparatus" class="grid grid-cols-2 gap-2 text-xs text-slate-700"></div>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-slate-900 text-sm mb-2"><i class="fa-solid fa-vial text-brand-600 mr-1"></i> Topshirish Mumkin Bo'lgan Tashxis va Tahlillar</h4>
+                <div id="modalClinicDiagnostics" class="flex flex-wrap gap-1.5"></div>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-slate-900 text-sm mb-2"><i class="fa-solid fa-user-doctor text-brand-600 mr-1"></i> Ushbu Klinikadagi Shifokorlar</h4>
+                <div id="modalClinicDoctors" class="space-y-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAP ROUTE MODAL -->
+    <div id="routeModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl p-6 relative space-y-4 shadow-2xl">
+            <button onclick="closeRouteModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h3 class="text-lg font-bold text-slate-900" id="routeModalTitle">Eng Muqobil Yo'l</h3>
+            <p class="text-xs text-slate-500" id="routeModalAddress">Manzil aniqlanmoqda...</p>
+            
+            <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-emerald-800 text-xs space-y-2">
+                <p class="font-bold flex items-center"><i class="fa-solid fa-traffic-light text-emerald-600 mr-2 text-sm"></i> Yo'l tirbandlikdan xoli (Probkasiz)</p>
+                <p>Ushbu klinikaga borish uchun eng qisqa va qulay marshrut tayyorlandi. Xaritada navigatsiyani ochish uchun tanlang:</p>
+            </div>
+
+            <div class="space-y-2">
+                <a id="gmapsLink" href="#" target="_blank" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center transition shadow">
+                    <i class="fa-solid fa-map-location-dot mr-2"></i> Google Maps Orqali Ochish
+                </a>
+                <a id="yandexLink" href="#" target="_blank" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-3 rounded-xl text-xs flex items-center justify-center transition shadow">
+                    <i class="fa-solid fa-location-arrow mr-2"></i> Yandex Maps / Navigator Orqali Ochish
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOOKING & PAYMENT MODAL -->
+    <div id="bookingModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl p-6 relative max-h-[90vh] overflow-y-auto shadow-2xl">
+            <button onclick="closeBookingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h3 class="text-xl font-bold text-slate-900 mb-1">Navbatga Yozilish & To'lov</h3>
+            <p id="bookingSubtext" class="text-xs text-brand-600 font-semibold mb-4">...</p>
+
+            <form onsubmit="submitBookingAndPay(event)" class="space-y-3 text-xs sm:text-sm">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Ism va Familiya</label>
+                    <input type="text" id="patientName" required placeholder="Masalan: Dilmurod Karimov" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:border-brand-600">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Telefon Raqami</label>
+                    <input type="tel" id="patientPhone" required placeholder="+998 90 123 45 67" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:border-brand-600">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Qabul Sanasi va Vaqti</label>
+                    <input type="datetime-local" required class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:border-brand-600">
+                </div>
+
+                <div class="pt-2 border-t border-slate-200">
+                    <label class="block font-bold text-slate-800 mb-2">Onlayn To'lov Usuli</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="border border-slate-200 p-2 rounded-xl flex flex-col items-center cursor-pointer">
+                            <input type="radio" name="paymentMethod" value="Click" checked class="mb-1">
+                            <span class="font-black text-blue-600 text-xs">CLICK</span>
+                        </label>
+                        <label class="border border-slate-200 p-2 rounded-xl flex flex-col items-center cursor-pointer">
+                            <input type="radio" name="paymentMethod" value="Payme" class="mb-1">
+                            <span class="font-black text-teal-500 text-xs">Payme</span>
+                        </label>
+                        <label class="border border-slate-200 p-2 rounded-xl flex flex-col items-center cursor-pointer">
+                            <input type="radio" name="paymentMethod" value="Uzum Pay" class="mb-1">
+                            <span class="font-black text-purple-600 text-xs">UzumPay</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="bg-slate-100 p-3 rounded-xl flex justify-between items-center text-xs">
+                    <span class="text-slate-600">To'lov summasi:</span>
+                    <span id="bookingPrice" class="font-extrabold text-slate-900 text-sm">0 so'm</span>
+                </div>
+
+                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl transition shadow-md">
+                    To'lov va Qabulni Tasdiqlash
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- RATING MODAL (ONLY FOR PAID USERS) -->
+    <div id="ratingModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl p-6 relative shadow-2xl space-y-4">
+            <button onclick="closeRatingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto text-2xl mb-2">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">To'lov Tasdiqlandi! Baho Bering</h3>
+                <p class="text-xs text-slate-500">Siz qabulga yozildingiz. Shifokor va klinikaga baho berishingiz mumkin:</p>
+            </div>
+
+            <div class="flex justify-center space-x-2 text-2xl text-amber-400 py-2">
+                <i class="fa-solid fa-star cursor-pointer hover:scale-110 transition"></i>
+                <i class="fa-solid fa-star cursor-pointer hover:scale-110 transition"></i>
+                <i class="fa-solid fa-star cursor-pointer hover:scale-110 transition"></i>
+                <i class="fa-solid fa-star cursor-pointer hover:scale-110 transition"></i>
+                <i class="fa-solid fa-star cursor-pointer hover:scale-110 transition"></i>
+            </div>
+
+            <textarea id="ratingComment" placeholder="Sharhingizni yozing (ixtiyoriy)..." class="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-none"></textarea>
+
+            <button onclick="submitRating()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 rounded-xl text-xs transition">
+                Bahoni Saqlash
+            </button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT CODE -->
+    <script>
+        const regions = [
+            { id: "tashkent_city", name: "Toshkent shahri", lat: 41.311, lng: 69.240 },
+            { id: "tashkent_reg", name: "Toshkent viloyati", lat: 41.200, lng: 69.400 },
+            { id: "andijan", name: "Andijon viloyati", lat: 40.782, lng: 72.344 },
+            { id: "bukhara", name: "Buxoro viloyati", lat: 39.774, lng: 64.428 },
+            { id: "fergana", name: "Farg'ona viloyati", lat: 40.384, lng: 71.784 },
+            { id: "jizzakh", name: "Jizzax viloyati", lat: 40.115, lng: 67.842 },
+            { id: "namangan", name: "Namangan viloyati", lat: 40.998, lng: 71.672 },
+            { id: "navoiy", name: "Navoiy viloyati", lat: 40.084, lng: 65.379 },
+            { id: "qashqadaryo", name: "Qashqadaryo viloyati", lat: 38.860, lng: 65.789 },
+            { id: "samarkand", name: "Samarqand viloyati", lat: 39.654, lng: 66.959 },
+            { id: "sirdaryo", name: "Sirdaryo viloyati", lat: 40.494, lng: 68.784 },
+            { id: "surxondaryo", name: "Surxondaryo viloyati", lat: 37.224, lng: 67.278 },
+            { id: "khorezm", name: "Xorazm viloyati", lat: 41.550, lng: 60.633 },
+            { id: "qoraqalpogiston", name: "Qoraqalpog'iston Respublikasi", lat: 43.768, lng: 59.021 }
+        ];
+
+        const specs = [
+            { id: "kardiologiya", name: "Kardiologiya" },
+            { id: "nevrologiya", name: "Nevrologiya" },
+            { id: "pediatriya", name: "Pediatriya" },
+            { id: "stomatologiya", name: "Stomatologiya" },
+            { id: "dermatologiya", name: "Dermatologiya" },
+            { id: "oftalmologiya", name: "Oftalmologiya" },
+            { id: "ginekologiya", name: "Ginekologiya" },
+            { id: "urologiya", name: "Urologiya" },
+            { id: "ortopediya", name: "Ortopediya" },
+            { id: "gastroenterologiya", name: "Gastroenterologiya" },
+            { id: "lor", name: "LOR" },
+            { id: "endokrinologiya", name: "Endokrinologiya" },
+            { id: "xirurgiya", name: "Xirurgiya" }
+        ];
+
+        let clinics = [];
+        let doctors = [];
+
+        let cImages = [
+            "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?w=600&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=600&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1516549655169-df83a0774514?w=600&auto=format&fit=crop&q=80"
+        ];
+        let dImages = [
+            "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1594824813566-88855ce78341?w=400&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&auto=format&fit=crop&q=80"
+        ];
+
+        let docFirstNames = ["Javlon", "Nilufar", "Sardor", "Malika", "Azizbek", "Gulnora", "Rustam", "Shahnoza", "Jamshid", "Dildora", "Otabek", "Feruza"];
+        let docLastNames = ["Alimov", "Rahimova", "Ikromov", "Usmanova", "Qodirov", "Karimova", "Tursunov", "Axmedova", "Salimov", "Zokirova", "Yusupov", "Nazarova"];
+
+        let cId = 1;
+        regions.forEach(r => {
+            for(let i=1; i<=3; i++) {
+                let s1 = specs[(cId * 2) % specs.length];
+                let s2 = specs[(cId * 2 + 1) % specs.length];
+                let s3 = specs[(cId * 2 + 2) % specs.length];
+                let price = 90000 + (i * 20000);
+
+                // Har bir klinikaga o'ziga xos tahlillar to'plami
+                let diags = ["Umumiy Qon Tahlili", "Biokimyoviy Qon Tahlili", "UZI Diagnostika"];
+                if (i === 1) diags.push("MRT 3.0 Tesla", "EKG va Xolter");
+                if (i === 2) diags.push("MSKT Kompyuter Tomografiya", "Gormonal Qon Tahlili");
+                if (i === 3) diags.push("Rentgen Raqamli", "Allergoproba Qon Tahlili");
+
+                clinics.push({
+                    id: cId,
+                    name: `${r.name.split(' ')[0]} Markaziy Med ${i}`,
+                    regionId: r.id,
+                    regionName: r.name,
+                    specsStr: `${s1.id} ${s2.id} ${s3.id}`,
+                    specsTags: `${s1.name}, ${s2.name}, ${s3.name}`,
+                    rating: (4.7 + (i * 0.1)).toFixed(1),
+                    price: price,
+                    image: cImages[(cId - 1) % cImages.length],
+                    address: `${r.name}, Markaziy ko'cha ${i * 15}-uy`,
+                    lat: r.lat + (i * 0.003),
+                    lng: r.lng + (i * 0.003),
+                    apparatus: ["MRT Siemens 3.0 Tesla", "MSKT 128-kesimli", "Ultrasavdo 4D Color", "Roche Avtoanalizator"],
+                    diagnostics: diags
+                });
+
+                let dFirst = docFirstNames[cId % docFirstNames.length];
+                let dLast = docLastNames[cId % docLastNames.length];
+
+                doctors.push({
+                    id: cId,
+                    name: `Dr. ${dFirst} ${dLast}`,
+                    specName: s1.name,
+                    specId: s1.id,
+                    clinicName: `${r.name.split(' ')[0]} Markaziy Med ${i}`,
+                    clinicId: cId,
+                    exp: 5 + (cId % 12),
+                    price: price,
+                    image: dImages[(cId - 1) % dImages.length]
+                });
+
+                cId++;
+            }
+        });
+
+        let isUserPaid = false;
+
+        // TAKLIFLAR MODALI
+        function openSuggestionModal() {
+            document.getElementById('suggestionModal').classList.remove('hidden');
+        }
+        function closeSuggestionModal() {
+            document.getElementById('suggestionModal').classList.add('hidden');
+        }
+        function submitSuggestion(e) {
+            e.preventDefault();
+            const name = document.getElementById('suggName').value;
+            alert(`Rahmat, ${name}! Taklifingiz qabul qilindi va ko'rib chiqish uchun yuborildi.`);
+            document.getElementById('suggName').value = '';
+            document.getElementById('suggText').value = '';
+            closeSuggestionModal();
+        }
+
+        // RO'YXATDAN O'TISH MODALI
+        function openRegisterModal() {
+            document.getElementById('registerModal').classList.remove('hidden');
+        }
+        function closeRegisterModal() {
+            document.getElementById('registerModal').classList.add('hidden');
+        }
+        function submitRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('regName').value;
+            const reg = document.getElementById('regRegion').value;
+            document.getElementById('authBtnText').innerText = name;
+            alert(`Tabriklaymiz, ${name}! Siz ${reg} bo'yicha ro'yxatdan o'tdingiz.`);
+            closeRegisterModal();
+        }
+
+        // RENDER CLINICS
+        function renderClinics(list) {
+            const grid = document.getElementById('clinicsGrid');
+            grid.innerHTML = '';
+            list.forEach(c => {
+                grid.innerHTML += `
+                    <div class="clinic-card tilt-card bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg transition flex flex-col justify-between">
+                        <div class="cursor-pointer" onclick="openClinicDetail(${c.id})">
+                            <div class="relative h-44 bg-slate-100">
+                                <img src="${c.image}" class="w-full h-full object-cover">
+                                <span class="absolute top-3 right-3 bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow">24/7 Ochiq</span>
+                                <span class="absolute bottom-2 left-2 bg-slate-900/80 text-white text-[10px] px-2 py-0.5 rounded">${c.regionName}</span>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h4 class="font-bold text-slate-900 text-base hover:text-brand-600 transition">${c.name}</h4>
+                                    <span class="text-amber-500 text-xs font-bold bg-amber-50 px-2 py-0.5 rounded"><i class="fa-solid fa-star"></i> ${c.rating}</span>
+                                </div>
+                                <p class="text-xs text-slate-500 mb-2"><i class="fa-solid fa-location-dot text-brand-500"></i> ${c.address}</p>
+                                <div class="flex flex-wrap gap-1 mb-3">
+                                    <span class="bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded">${c.specsTags}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 pt-0 border-t border-slate-100 flex flex-col gap-2 mt-auto">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-500">Qabul: <strong class="text-slate-800">${c.price.toLocaleString()} so'm</strong></span>
+                                <button onclick="openRouteModal('${c.name.replace(/'/g, "\\'")}', '${c.address.replace(/'/g, "\\'")}', ${c.lat}, ${c.lng})" class="text-amber-600 font-bold hover:underline flex items-center">
+                                    <i class="fa-solid fa-location-arrow mr-1"></i> Eng muqobil yo'l
+                                </button>
+                            </div>
+                            <button onclick="openBookingModal('${c.name.replace(/'/g, "\\'")}', 'Umumiy Navbat', ${c.price})" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2 rounded-xl text-xs transition">
+                                Navbat & Onlayn To'lov
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // RENDER DOCTORS
+        function renderDoctors(list) {
+            const grid = document.getElementById('doctorsGrid');
+            grid.innerHTML = '';
+            list.forEach(d => {
+                grid.innerHTML += `
+                    <div class="bg-white rounded-2xl p-4 border border-slate-200 hover:shadow-md transition flex flex-col justify-between">
+                        <div>
+                            <img src="${d.image}" class="w-full h-44 object-cover rounded-xl mb-3">
+                            <h4 class="font-bold text-slate-900 text-sm">${d.name}</h4>
+                            <p class="text-xs text-brand-600 font-semibold mb-1">${d.specName}</p>
+                            <p class="text-[10px] text-slate-400 mb-2"><i class="fa-solid fa-hospital"></i> ${d.clinicName}</p>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-2 pt-2 border-t border-slate-100">
+                                <span>Tajriba: ${d.exp} yil</span>
+                                <strong class="text-slate-800">${d.price.toLocaleString()} so'm</strong>
+                            </div>
+                            <button onclick="openBookingModal('${d.name.replace(/'/g, "\\'")}', '${d.specName}', ${d.price})" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-1.5 rounded-lg text-xs transition">
+                                Yozilish & To'lash
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // CLINIC DETAIL MODAL
+        function openClinicDetail(id) {
+            const c = clinics.find(item => item.id === id);
+            if (!c) return;
+
+            document.getElementById('modalClinicImg').src = c.image;
+            document.getElementById('modalClinicName').innerText = c.name;
+            document.getElementById('modalClinicAddress').innerHTML = `<i class="fa-solid fa-location-dot text-brand-500"></i> ${c.address}`;
+            document.getElementById('modalClinicRating').innerHTML = `<i class="fa-solid fa-star"></i> ${c.rating}`;
+
+            const appDiv = document.getElementById('modalClinicApparatus');
+            appDiv.innerHTML = '';
+            c.apparatus.forEach(app => {
+                appDiv.innerHTML += `<div class="bg-slate-100 p-2 rounded-lg border border-slate-200"><i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i> ${app}</div>`;
+            });
+
+            const diagDiv = document.getElementById('modalClinicDiagnostics');
+            diagDiv.innerHTML = '';
+            c.diagnostics.forEach(diag => {
+                diagDiv.innerHTML += `<span class="bg-brand-50 text-brand-700 font-medium px-2.5 py-1 rounded-lg text-xs border border-brand-200">${diag}</span>`;
+            });
+
+            const docDiv = document.getElementById('modalClinicDoctors');
+            docDiv.innerHTML = '';
+            const cDoctors = doctors.filter(d => d.clinicId === c.id);
+            cDoctors.forEach(d => {
+                docDiv.innerHTML += `
+                    <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs">
+                        <div class="flex items-center space-x-2">
+                            <img src="${d.image}" class="w-8 h-8 rounded-full object-cover">
+                            <div>
+                                <p class="font-bold text-slate-800">${d.name}</p>
+                                <p class="text-[10px] text-brand-600">${d.specName}</p>
+                            </div>
+                        </div>
+                        <button onclick="closeClinicDetailModal(); openBookingModal('${d.name.replace(/'/g, "\\'")}', '${d.specName}', ${d.price})" class="bg-brand-600 text-white px-3 py-1 rounded-lg font-semibold">
+                            Yozilish
+                        </button>
+                    </div>
+                `;
+            });
+
+            document.getElementById('clinicDetailModal').classList.remove('hidden');
+        }
+
+        function closeClinicDetailModal() {
+            document.getElementById('clinicDetailModal').classList.add('hidden');
+        }
+
+        // MAP ROUTE
+        function getBestRouteWithLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const userLat = pos.coords.latitude;
+                        const userLng = pos.coords.longitude;
+                        document.getElementById('userLocText').innerText = `GPS: (${userLat.toFixed(2)}, ${userLng.toFixed(2)})`;
+                        const target = clinics[0];
+                        openRouteModal(target.name, target.address, target.lat, target.lng, userLat, userLng);
+                    },
+                    () => {
+                        document.getElementById('userLocText').innerText = "Toshkent shahri";
+                        const target = clinics[0];
+                        openRouteModal(target.name, target.address, target.lat, target.lng);
+                    }
+                );
+            } else {
+                const target = clinics[0];
+                openRouteModal(target.name, target.address, target.lat, target.lng);
+            }
+        }
+
+        function openRouteModal(name, address, lat, lng, originLat = null, originLng = null) {
+            document.getElementById('routeModalTitle').innerText = name;
+            document.getElementById('routeModalAddress').innerText = "Manzil: " + address;
+            
+            let gUrl = originLat ? 
+                `https://www.google.com/maps/dir/?api=1&origin=${originLat},${originLng}&destination=${lat},${lng}` :
+                `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+            
+            let yUrl = originLat ?
+                `https://yandex.com/maps/?rtext=${originLat},${originLng}~${lat},${lng}&rtt=auto` :
+                `https://yandex.com/maps/?rtext=~${lat},${lng}`;
+
+            document.getElementById('gmapsLink').href = gUrl;
+            document.getElementById('yandexLink').href = yUrl;
+            document.getElementById('routeModal').classList.remove('hidden');
+        }
+
+        function closeRouteModal() {
+            document.getElementById('routeModal').classList.add('hidden');
+        }
+
+        // BOOKING & PAYMENT & RATING
+        let currentBookingPrice = 0;
+        let currentServiceTitle = "";
+
+        function openBookingModal(title, spec, price) {
+            currentBookingPrice = price;
+            currentServiceTitle = `${title} (${spec})`;
+            document.getElementById('bookingSubtext').innerText = currentServiceTitle;
+            document.getElementById('bookingPrice').innerText = price.toLocaleString() + " so'm";
+            document.getElementById('bookingModal').classList.remove('hidden');
+        }
+
+        function closeBookingModal() {
+            document.getElementById('bookingModal').classList.add('hidden');
+        }
+
+        function submitBookingAndPay(e) {
+            e.preventDefault();
+            isUserPaid = true;
+            closeBookingModal();
+            document.getElementById('ratingModal').classList.remove('hidden');
+        }
+
+        function closeRatingModal() {
+            document.getElementById('ratingModal').classList.add('hidden');
+        }
+
+        function submitRating() {
+            if(!isUserPaid) {
+                alert("Baho berish uchun avval to'lov qilib navbatga yozilishingiz kerak!");
+                return;
+            }
+            alert("Rahmat! Bahoyingiz qabul qilindi.");
+            closeRatingModal();
+        }
+
+        // AQLLI VA KENGAYTIRILGAN AI CHAT BOT
+        function toggleAiModal() {
+            document.getElementById('aiModal').classList.toggle('hidden');
+        }
+
+        function openAiChat(initialText) {
+            document.getElementById('aiModal').classList.remove('hidden');
+            if(initialText) {
+                document.getElementById('chatInput').value = initialText;
+                sendChatMessage();
+            }
+        }
+
+        function sendPresetSymptom(txt) {
+            document.getElementById('chatInput').value = txt;
+            sendChatMessage();
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const chat = document.getElementById('chatMessages');
+            chat.innerHTML += `
+                <div class="flex items-start justify-end space-x-2">
+                    <div class="bg-brand-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] leading-relaxed">
+                        ${text}
+                    </div>
+                </div>
+            `;
+            input.value = '';
+            chat.scrollTop = chat.scrollHeight;
+
+            setTimeout(() => {
+                const lower = text.toLowerCase();
+                let reply = "";
+
+                // 1. Tahlil / Diagnostika so'rovlari (Qon topshirish, MRT, UZI, EKG va h.k.)
+                if (lower.includes('qon') || lower.includes('tahlil') || lower.includes('analiz') || lower.includes('mrt') || lower.includes('uzi') || lower.includes('ekg') || lower.includes('rentgen')) {
+                    let diagKey = "";
+                    let diagName = "";
+                    if (lower.includes('qon')) { diagKey = "Qon"; diagName = "Qon tahlillari"; }
+                    else if (lower.includes('mrt')) { diagKey = "MRT"; diagName = "MRT (Magnit-rezonans tomografiya)"; }
+                    else if (lower.includes('uzi')) { diagKey = "UZI"; diagName = "UZI (Ultratovush tekshiruvi)"; }
+                    else if (lower.includes('ekg')) { diagKey = "EKG"; diagName = "EKG va yurak tekshiruvi"; }
+                    else if (lower.includes('rentgen')) { diagKey = "Rentgen"; diagName = "Raqamli Rentgen"; }
+                    else { diagKey = "Tahlil"; diagName = "Laboratoriya va diagnostika tahlillari"; }
+
+                    // Mos klinikalarni bazadan izlash
+                    const matchedClinics = clinics.filter(c => 
+                        c.diagnostics.some(d => d.toLowerCase().includes(diagKey.toLowerCase()))
+                    ).slice(0, 5);
+
+                    let clinicsHtml = matchedClinics.map(c => 
+                        `<div onclick="toggleAiModal(); openClinicDetail(${c.id});" class="mt-1.5 p-2 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-xl cursor-pointer flex justify-between items-center text-xs transition">
+                            <div>
+                                <p class="font-bold text-brand-900">🏥 ${c.name}</p>
+                                <p class="text-[10px] text-slate-600">${c.address}</p>
+                            </div>
+                            <span class="text-brand-700 font-bold text-[10px] underline">Kirish &rarr;</span>
+                        </div>`
+                    ).join('');
+
+                    reply = `<strong>${diagName}</strong> topshirish uchun quyidagi klinikalarga murojaat qilishingiz mumkin (klinika ustiga bosib ichiga kiring): ${clinicsHtml}`;
+                }
+                // 2. Ko'z kasalliklari -> Oftalmolog
+                else if (lower.includes('koz') || lower.includes('ko\'z') || lower.includes('xira') || lower.includes('yoshlan')) {
+                    reply = `Ko'z og'rig'i, qizarishi yoki ko'rishning xiralashishi bo'yicha <strong>Oftalmolog (Ko'z shifokori)</strong> ko'rigidan o'tishingiz zarur.<br>
+                    <button onclick="toggleAiModal(); document.getElementById('specSelect').value='oftalmologiya'; filterClinics(); scrollToSection('clinics');" class="mt-2 bg-brand-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Oftalmologiya klinikalarini ko'rish</button>`;
+                }
+                // 3. Tish kasalliklari -> Stomatolog
+                else if (lower.includes('tish') || lower.includes('milk') || lower.includes('jag\'')) {
+                    reply = `Tish yoki milk og'rig'i bezovta qilayotgan bo'lsa, darhol <strong>Stomatolog</strong> mutaxassisiga uchrashing.<br>
+                    <button onclick="toggleAiModal(); document.getElementById('specSelect').value='stomatologiya'; filterClinics(); scrollToSection('clinics');" class="mt-2 bg-brand-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Stomatologiya klinikalarini ko'rish</button>`;
+                }
+                // 4. Quloq, tomoq, burun -> LOR
+                else if (lower.includes('quloq') || lower.includes('tomoq') || lower.includes('burun') || lower.includes('angina') || lower.includes('tumov')) {
+                    reply = `Quloq, tomoq yoki burun bilan bog'liq muammolar uchun <strong>LOR (Otorinolaringolog)</strong> shifokoriga murojaat qilishingiz kerak.<br>
+                    <button onclick="toggleAiModal(); document.getElementById('specSelect').value='lor'; filterClinics(); scrollToSection('clinics');" class="mt-2 bg-brand-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">LOR klinikalarini ko'rish</button>`;
+                }
+                // 5. Bosh va asab -> Nevrolog
+                else if (lower.includes('bosh') || lower.includes('uyqu') || lower.includes('asab') || lower.includes('bel') || lower.includes('umurtqa')) {
+                    reply = `Bosh og'rig'i, uyqusizlik yoki asab tizimi bezovtaliklari bo'yicha <strong>Nevrolog</strong> mutaxassisiga uchrashing.<br>
+                    <button onclick="toggleAiModal(); document.getElementById('specSelect').value='nevrologiya'; filterClinics(); scrollToSection('clinics');" class="mt-2 bg-brand-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Nevrologiya klinikalarini ko'rish</button>`;
+                }
+                // 6. Yurak va qon bosimi -> Kardiolog
+                else if (lower.includes('yurak') || lower.includes('nafas') || lower.includes('davleniya') || lower.includes('bosim') || lower.includes('sanch')) {
+                    reply = `Yurak sanchishi, hansirash yoki qon bosimi o'zgarishi bo'yicha <strong>Kardiolog</strong> ko'rigidan o'tishingiz shart.<br>
+                    <button onclick="toggleAiModal(); document.getElementById('specSelect').value='kardiologiya'; filterClinics(); scrollToSection('clinics');" class="mt-2 bg-brand-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Kardiologiya klinikalarini ko'rish</button>`;
+                }
+                // 7. Teri va allergiya -> Dermatolog
+                else if (lower.includes('teri') || lower.includes('toshma') || lower.includes('qichish') || lower.includes('dog\'')) {
+                    reply = `Teri toshmalari, qichishish yoki dog'lar paydo bo'lganda <strong>Dermatolog</strong> shifokoriga murojaat qiling.<br>
+                    <button onclick="toggleAiModal(); document.getElementById('specSelect').value='dermatologiya'; filterClinics(); scrollToSection('clinics');" class="mt-2 bg-brand-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Dermatologiya klinikalarini ko'rish</button>`;
+                }
+                // 8. Oshqozon va hazm qilish -> Gastroenterolog
+                else if (lower.includes('oshqozon') || lower.includes('qorin') || lower.includes('jigar') || lower.includes('ichak') || lower.includes('ko\'ngil ayn')) {
+                    reply = `Oshqozon-ichak va hazm qilish tizimidagi og'riqlar bo'yicha <strong>Gastroenterolog</strong> mutaxassisiga uchrashing.<br>
+                    <button onclick="toggleAiModal(); document.getElementById('specSelect').value='gastroenterologiya'; filterClinics(); scrollToSection('clinics');" class="mt-2 bg-brand-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Gastroenterologiya klinikalarini ko'rish</button>`;
+                }
+                // 9. Bola salomatligi -> Pediatr
+                else if (lower.includes('bola') || lower.includes('farzand') || lower.includes('chaqaloq') || lower.includes('go\'dak')) {
+                    reply = `Bolalar salomatligi va isitma/shamollash holatlarida <strong>Pediatr</strong> shifokorimizga murojaat qiling.<br>
+                    <button onclick="toggleAiModal(); document.getElementById('specSelect').value='pediatriya'; filterClinics(); scrollToSection('clinics');" class="mt-2 bg-brand-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Pediatriya klinikalarini ko'rish</button>`;
+                }
+                // 10. Suyak va bo'g'imlar -> Ortoped
+                else if (lower.includes('suyak') || lower.includes('bo\'g\'im') || lower.includes('oyoq') || lower.includes('qo\'l') || lower.includes('sin') || lower.includes('lat')) {
+                    reply = `Suyak, bo'g'im og'riqlari yoki jarohatlar bo'yicha <strong>Ortoped-Travmatolog</strong> ko'rigidan o'ting.<br>
+                    <button onclick="toggleAiModal(); document.getElementById('specSelect').value='ortopediya'; filterClinics(); scrollToSection('clinics');" class="mt-2 bg-brand-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Ortopediya klinikalarini ko'rish</button>`;
+                }
+                // 11. Ayollar salomatligi -> Ginekolog
+                else if (lower.includes('ayol') || lower.includes('homila') || lower.includes('ginekolog')) {
+                    reply = `Ayollar salomatligi va tibbiy kuzatuv bo'yicha <strong>Ginekolog</strong> shifokoriga uchrashing.<br>
+                    <button onclick="toggleAiModal(); document.getElementById('specSelect').value='ginekologiya'; filterClinics(); scrollToSection('clinics');" class="mt-2 bg-brand-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Ginekologiya klinikalarini ko'rish</button>`;
+                }
+                // 12. Buyrak va siydik yo'llari -> Urolog
+                else if (lower.includes('buyrak') || lower.includes('siydik') || lower.includes('urolog')) {
+                    reply = `Buyrak va siydik yo'llari bilan bog'liq bezovtaliklarda <strong>Urolog</strong> shifokoriga murojaat qiling.<br>
+                    <button onclick="toggleAiModal(); document.getElementById('specSelect').value='urologiya'; filterClinics(); scrollToSection('clinics');" class="mt-2 bg-brand-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Urologiya klinikalarini ko'rish</button>`;
+                }
+                // 13. Qandli diabet va gormonlar -> Endokrinolog
+                else if (lower.includes('qand') || lower.includes('diabet') || lower.includes('gormon') || lower.includes('buqoq') || lower.includes('semiz')) {
+                    reply = `Qandli diabet, qalqonsimon bez yoki gormonal o'zgarishlar bo'yicha <strong>Endokrinolog</strong> mutaxassisiga uchrashing.<br>
+                    <button onclick="toggleAiModal(); document.getElementById('specSelect').value='endokrinologiya'; filterClinics(); scrollToSection('clinics');" class="mt-2 bg-brand-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Endokrinologiya klinikalarini ko'rish</button>`;
+                }
+                // Umumiy holat
+                else {
+                    reply = "Aniqroq mutaxassis yoki klinika tavsiya qilishim uchun qaysi a'zongiz og'riyotganini (masalan: <em>ko'z, tish, yurak, bosh, oshqozon</em>) yoki qanday tahlil (masalan: <em>qon topshirish, MRT, UZI</em>) kerakligini yozing.";
+                }
+
+                chat.innerHTML += `
+                    <div class="flex items-start space-x-2">
+                        <div class="w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs shrink-0 mt-1">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 text-slate-800 max-w-[85%] shadow-sm leading-relaxed">
+                            ${reply}
+                        </div>
+                    </div>
+                `;
+                chat.scrollTop = chat.scrollHeight;
+            }, 500);
+        }
+
+        // FILTER LOGIC
+        function filterClinics() {
+            const query = document.getElementById('clinicSearchInput').value.toLowerCase();
+            const regVal = document.getElementById('regionSelect').value;
+            const specVal = document.getElementById('specSelect').value;
+
+            const filtered = clinics.filter(c => {
+                const matchQuery = c.name.toLowerCase().includes(query) || c.address.toLowerCase().includes(query);
+                const matchRegion = (regVal === 'all' || c.regionId === regVal);
+                const matchSpec = (specVal === 'all' || c.specsStr.includes(specVal));
+                return matchQuery && matchRegion && matchSpec;
+            });
+
+            renderClinics(filtered);
+        }
+
+        function handleHeroSearch() {
+            const val = document.getElementById('heroSearch').value;
+            document.getElementById('clinicSearchInput').value = val;
+            filterClinics();
+            document.getElementById('clinics').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        window.onload = function() {
+            renderClinics(clinics);
+            renderDoctors(doctors);
+        };
+    </script>
+</body>
+</html>
